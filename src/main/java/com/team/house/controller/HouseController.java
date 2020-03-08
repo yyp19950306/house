@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.team.house.entity.House;
 import com.team.house.entity.Users;
 import com.team.house.service.HouseService;
+import com.team.house.sms.SendMsgUtil;
 import com.team.house.util.FileUploadUtil;
 import com.team.house.util.HouseCondition;
 import com.team.house.util.PageParameter;
@@ -76,5 +77,26 @@ public class HouseController {
         map.put("pages", pageInfo.getPages());
         map.put("list", pageInfo.getList());
         return map;
+    }
+
+    @RequestMapping("/sendCode")
+    public String sendCode(String smsMob,HttpSession session) {
+        int code = (int) Math.round((Math.random() + 1) * 1000);
+        session.setAttribute("randCode", code);
+        session.setMaxInactiveInterval(300);
+        String smsText = "验证码是：" + code;
+        int result = SendMsgUtil.sendMsg(smsText, smsMob);
+        return "{\"result\":" + result + "}";
+    }
+
+    @RequestMapping("/loginAction2")
+    public String loginAction2(String inputCode, HttpSession session) {
+        String randCode = session.getAttribute("randCode").toString();
+        if (inputCode.equals(randCode)) {
+
+            return "{\"result\":1}";
+        } else {
+            return "{\"result\":0}";
+        }
     }
 }
